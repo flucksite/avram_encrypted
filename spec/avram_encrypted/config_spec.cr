@@ -23,4 +23,21 @@ describe AvramEncrypted do
       end
     end
   end
+
+  describe ".current_key" do
+    it "returns the current encryption key" do
+      AvramEncrypted.configure do |settings|
+        settings.keys = {
+          "20230415" => "abc123",
+          "20251108" => "def456",
+        }
+        settings.key_version = "20251108"
+      end
+
+      AvramEncrypted.current_key.should eq("def456")
+      AvramEncrypted.temp_config(key_version: "20230415") do
+        AvramEncrypted.current_key.should eq("abc123")
+      end
+    end
+  end
 end

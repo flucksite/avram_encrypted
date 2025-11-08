@@ -18,4 +18,8 @@ module AvramEncrypted
   rescue NilAssertionError
     Habitat.raise_validation_error("The `keys` setting must be set before the `key_version`")
   end
+
+  def self.current_key
+    AvramEncrypted.settings.keys[AvramEncrypted.settings.key_version]
+  end
 end
