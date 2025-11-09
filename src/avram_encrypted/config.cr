@@ -4,7 +4,6 @@ module AvramEncrypted
   Habitat.create do
     setting keys : Hash(String, String), validation: :validate_at_least_one
     setting key_version : String, validation: :validate_existence
-    setting auto_rotate : Bool = false
   end
 
   def self.validate_at_least_one(value : Hash(String, String))
