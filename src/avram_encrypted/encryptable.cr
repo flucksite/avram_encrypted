@@ -60,7 +60,7 @@ module AvramEncrypted::Encryptable
       end
 
       def to_db(value : {{target_type}}) : String
-        encrypt_with_version(value.to_s)
+        to_db({{@type}}.new(value))
       end
 
       def to_db(value : {{@type}}) : String
