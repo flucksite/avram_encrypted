@@ -45,16 +45,16 @@ new saves use your current encryption key.
    ```crystal
    class User < BaseModel
      table do
-       secret_value : AvramEncrypted::EncryptedString
+       column secret_value : AvramEncrypted::EncryptedString
      end
    end
    ```
 
 ### Key versioning
 
-Encryption keys are configured as a `Hash(String, String)` pairs, where the
-hash key is the version and the has value is the encryption key. How the keys
-are versioned it entirely up to you.
+Encryption keys are configured as `Hash(String, String)` pairs, where the hash
+key is the version and the hash value is the encryption key. How the keys are
+versioned is entirely up to you.
 
 You could keep it simple and use `"0"`, `"1"`, `"2"`, etc. Or you could make
 the keys more self-documenting and use timestamps: `"202405"`, `"202511"`, etc.
@@ -62,7 +62,7 @@ Whatever works best for you.
 
 ### Rotating keys
 
-At some point you'll want to rotate the encryption keys. They `key_version` is
+At some point you'll want to rotate the encryption keys. The `key_version` is
 the one that will always be used to save values. So you can add a new key,
 update the `key_version` pointer and **avram_encrypted** will take care of the
 rest:
