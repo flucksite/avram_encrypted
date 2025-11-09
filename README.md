@@ -1,6 +1,13 @@
-# avram_encrypted
+# AvramEncrypted
 
-TODO: Write a description here
+Encrypted columns for Avram supporting multiple types and automatic key rotation.
+
+Store sensitive data encrypted in your database leveraging Lucky's built-in
+`MessageEncryptor` (AES-256-CBC). Values are automatically encrypted before
+saving and decrypted when reading, so you can use them like regular columns.
+
+Key rotation is supported out of the box, so old data remains readable while
+new saves use your current encryption key.
 
 ## Installation
 
@@ -9,31 +16,82 @@ TODO: Write a description here
    ```yaml
    dependencies:
      avram_encrypted:
-       github: your-github-user/avram_encrypted
+       codeberg: fluck/avram_encrypted
    ```
 
 2. Run `shards install`
 
 ## Usage
 
+1. Include the shard in your `shards.cr` file:
+
+   ```crystal
+   require "avram_encrypted"
+   ```
+
+2. Configure the keys:
+
+   ```crystal
+   AvramEncrypted.configure do |settings|
+     settings.keys = {
+       "v1" => "EnjmNNd/WgF9b9cm3ObR+9cYPHQ7G7lIiUL/pShKWP0=",
+     }
+     settings.key_version = "v1"
+   end
+   ```
+
+3. Define the encrypted column:
+
+   ```crystal
+   class User < BaseModel
+     table do
+       secret_value : AvramEncrypted::EncryptedString
+     end
+   end
+   ```
+
+### Key versioning
+
+Encryption keys are configured as a `Hash(String, String)` pairs, where the
+hash key is the version and the has value is the encryption key. How the keys
+are versioned it entirely up to you.
+
+You could keep it simple and use `"0"`, `"1"`, `"2"`, etc. Or you could make
+the keys more self-documenting and use timestamps: `"202405"`, `"202511"`, etc.
+Whatever works best for you.
+
+### Rotating keys
+
+At some point you'll want to rotate the encryption keys. They `key_version` is
+the one that will always be used to save values. So you can add a new key,
+update the `key_version` pointer and **avram_encrypted** will take care of the
+rest:
+
 ```crystal
-require "avram_encrypted"
+AvramEncrypted.configure do |settings|
+  settings.keys = {
+    "v1" => "EnjmNNd/WgF9b9cm3ObR+9cYPHQ7G7lIiUL/pShKWP0=",
+    "v2" => "WFRN364zJAqxuc/j5KTlEzSRNXIrulL6Hx4bV6T9UuA=",
+  }
+  settings.key_version = "v2"
+end
 ```
 
-TODO: Write usage instructions here
-
-## Development
-
-TODO: Write development instructions here
+> [!NOTE]
+> A bulk key rotation mechanism is in the making. You'll be able to run
+> batched rotation jobs focussed on specific columns in the background.
 
 ## Contributing
 
+We use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
+for our commit messages, so please adhere to that pattern.
+
 1. Fork it (<https://github.com/your-github-user/avram_encrypted/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
+3. Commit your changes (`git commit -am 'feat: new feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
 
 ## Contributors
 
-- [Wout](https://github.com/your-github-user) - creator and maintainer
+- [Wout](https://codeberg.org/w0u7) - creator and maintainer
