@@ -6,14 +6,14 @@ describe AvramEncrypted::EncryptedInt32 do
   end
 
   describe "#to_s" do
-    it "returns the encrypted value" do
+    it "returns the value" do
       encryptor = AvramEncrypted::EncryptedInt32.new(123)
       encryptor.to_s.should eq("123")
     end
   end
 
   describe "#value" do
-    it "returns the encrypted value" do
+    it "returns the value" do
       encryptor = AvramEncrypted::EncryptedInt32.new("123".to_slice)
       encryptor.value.should eq(123)
     end

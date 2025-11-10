@@ -16,26 +16,40 @@ module AvramEncrypted::Encryptable
       Lucky
     end
 
-    getter value : {{target_type}}
-
-    def initialize(@value : {{target_type}})
-    end
-
-    def initialize(value : String)
-      {% if is_string %}
-        @value = value
-      {% else %}
-        @value = {{target_type}}.from_json(value)
-      {% end %}
-    end
-
     def initialize(encrypted : Slice(UInt8))
       initialize(String.new(encrypted))
     end
 
-    def to_s : String
-      @value{% unless is_string %}.to_json{% end %}
-    end
+    {% if is_internal %}
+      getter value : {{target_type}}
+
+      def initialize(@value : {{target_type}})
+      end
+
+      def initialize(value : String)
+        {% if is_string %}
+          @value = value
+        {% else %}
+          @value = {{target_type}}.from_json(value)
+        {% end %}
+      end
+
+      def to_s : String
+        @value{% unless is_string %}.to_json{% end %}
+      end
+    {% else %}
+      def initialize(value : String)
+        initialize(JSON::PullParser.new(value))
+      end
+
+      def to_s : String
+        to_json
+      end
+
+      def value : {{@type}}
+        self
+      end
+    {% end %}
 
     {% if is_string %}
       def blank? : Bool
@@ -59,9 +73,11 @@ module AvramEncrypted::Encryptable
         SuccessfulCast({{@type}}).new({{@type}}.new(value))
       end
 
-      def to_db(value : {{target_type}}) : String
-        to_db({{@type}}.new(value))
-      end
+      {% if is_internal %}
+        def to_db(value : {{target_type}}) : String
+          to_db({{@type}}.new(value))
+        end
+      {% end %}
 
       def to_db(value : {{@type}}) : String
         encrypt_with_version(value.to_s)
@@ -75,7 +91,7 @@ module AvramEncrypted::Encryptable
       end
 
       private def decrypt_with_version(value : String)
-        key, payload = EncryptedValue.new(value).parse
+        key, payload = AvramEncrypted::EncryptedValue.new(value).parse
         encryptor = ::Lucky::MessageEncryptor.new(key)
         encryptor.verify_and_decrypt(payload)
       end

@@ -101,7 +101,6 @@ built-in type that responds to `#to_json` and `.from_json`:
 @[AvramEncrypted::Types(String, Int32, Bool, UInt16)]
 module AvramEncrypted
 end
-
 ```
 
 Those additional encrypted types will then be available as:

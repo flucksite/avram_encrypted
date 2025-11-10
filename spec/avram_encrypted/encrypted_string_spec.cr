@@ -6,14 +6,14 @@ describe AvramEncrypted::EncryptedString do
   end
 
   describe "#to_s" do
-    it "returns the encrypted value" do
+    it "returns the value" do
       encryptor = AvramEncrypted::EncryptedString.new("thedata")
       encryptor.to_s.should eq("thedata")
     end
   end
 
   describe "#value" do
-    it "returns the encrypted value" do
+    it "returns the value" do
       encryptor = AvramEncrypted::EncryptedString.new("thedata".to_slice)
       encryptor.value.should eq("thedata")
     end
