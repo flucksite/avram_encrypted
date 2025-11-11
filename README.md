@@ -68,6 +68,71 @@ new saves use your current encryption key.
 > add secret_value : String, index: true
 > ```
 
+### Encrypting built-in types
+
+By default, this shard comes with the following encrypted base types:
+
+- `AvramEncrypted::EncryptedString`
+- `AvramEncrypted::EncryptedInt32`
+
+Using the `AvramEncrypted::Types` annotation, you can register any other
+built-in type that responds to `#to_json` and `.from_json`:
+
+```crystal
+# config/avram_encrypted.cr
+
+@[AvramEncrypted::Types(String, Int32, Bool, UInt16)]
+module AvramEncrypted
+end
+```
+
+Those additional encrypted types will then be available as:
+
+- `AvramEncrypted::EncryptedBool`
+- `AvramEncrypted::EncryptedUInt16`
+
+### Encrypting JSON objects
+
+It's also possible to encrypt complete objects. Since the encrypted data can't
+be queried, it's actually a more efficient way to store encrypted data than
+creating individual columns.
+
+This works by creating a struct and including `AvramEncrypted::Encryptable`:
+
+```crystal
+class User < BaseModel
+  table do
+    # ...
+    column secret_data : SecretData
+  end
+
+  struct SecretData
+    include AvramEncrypted::Encryptable
+
+    getter : ip_address : String
+    getter : otp_secret : String
+
+    def initialize(@ip_address : String, @otp_secret : String)
+    end
+  end
+end
+```
+
+Then those details can be accessed as usual:
+
+```crystal
+user = UserQuery.find(1)
+user.secret_data.ip_address
+# => 123.45.67.89
+```
+
+> [!NOTE]
+> This shard leverages Crystal's JSON pull-parser to stringify values before
+> encrypting them, and the other way around. That's why any class or struct
+> that implements to `#to_json` and `.from_json` will work. The
+> `AvramEncrypted::Encryptable` module takes care of this by including
+> `JSON::Serializable`.
+
 ## Configuration
 
 ### Key versioning
@@ -102,34 +167,6 @@ end
 > [!NOTE]
 > A bulk key rotation mechanism is in the making. You'll be able to run
 > batched rotation jobs focussed on specific columns in the background.
-
-### Encrypting built-in types
-
-By default, this shard comes with the following encrypted base types:
-
-- `AvramEncrypted::EncryptedString`
-- `AvramEncrypted::EncryptedInt32`
-
-Using the `AvramEncrypted::Types` annotation, you can register any other
-built-in type that responds to `#to_json` and `.from_json`:
-
-```crystal
-# config/avram_encrypted.cr
-
-@[AvramEncrypted::Types(String, Int32, Bool, UInt16)]
-module AvramEncrypted
-end
-```
-
-Those additional encrypted types will then be available as:
-
-- `AvramEncrypted::EncryptedBool`
-- `AvramEncrypted::EncryptedUInt16`
-
-> [!NOTE]
-> Under the hood, this shard leverages Crystal's JSON pull-parser to stringify
-> values before encrypting them, and the other way around. That's why any class
-> or struct that implements to `#to_json` and `.from_json` will work.
 
 ## Contributing
 
