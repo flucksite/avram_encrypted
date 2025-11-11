@@ -117,7 +117,7 @@ class User < BaseModel
 end
 ```
 
-Then those details can be accessed as usual:
+Then those details can be accessed as expected:
 
 ```crystal
 user = UserQuery.find(1)
@@ -177,6 +177,12 @@ for our commit messages, so please adhere to that pattern.
 3. Commit your changes (`git commit -am 'feat: new feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
+
+### Acknowledgements
+
+This shard pulls inspiration from the following project:
+
+- [microgit-com/lucky_encrypted](https://github.com/microgit-com/lucky_encrypted)
 
 ## Contributors
 
