@@ -185,7 +185,7 @@ for our commit messages, so please adhere to that pattern.
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
 
-### Acknowledgements
+## Acknowledgements
 
 This shard pulls inspiration from the following project:
 
