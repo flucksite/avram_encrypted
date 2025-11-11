@@ -5,9 +5,9 @@ module AvramEncrypted::Encryptable
   macro included
     {% target_type = @type.stringify.gsub(/^AvramEncrypted::Encrypted/, "").id %}
     {% is_string = target_type.id == String.id %}
-    {% is_internal = @type.stringify.starts_with?("AvramEncrypted::Encrypted") %}
+    {% is_std_type = @type.stringify.starts_with?("AvramEncrypted::Encrypted") %}
 
-    {% unless is_internal %}
+    {% unless is_std_type %}
       include ::JSON::Serializable
     {% end %}
     include ::Lucky::AllowedInTags
@@ -20,7 +20,7 @@ module AvramEncrypted::Encryptable
       initialize(String.new(encrypted))
     end
 
-    {% if is_internal %}
+    {% if is_std_type %}
       getter value : {{target_type}}
 
       def initialize(@value : {{target_type}})
@@ -38,10 +38,6 @@ module AvramEncrypted::Encryptable
         @value{% unless is_string %}.to_json{% end %}
       end
     {% else %}
-      def initialize(value : String)
-        initialize(JSON::PullParser.new(value))
-      end
-
       def to_s : String
         to_json
       end
@@ -62,18 +58,18 @@ module AvramEncrypted::Encryptable
       include ::Avram::Type
 
       def from_db!(value : String)
-        {{@type}}.new(decrypt_with_version(value))
+        {% if is_std_type %}
+          {{@type}}.new(decrypt_with_version(value))
+        {% else %}
+          {{@type}}.from_json(String.new(decrypt_with_version(value)))
+        {% end %}
       end
 
       def parse(value : {{@type}})
         SuccessfulCast({{@type}}).new(value)
       end
 
-      def parse(value)
-        SuccessfulCast({{@type}}).new({{@type}}.new(value))
-      end
-
-      {% if is_internal %}
+      {% if is_std_type %}
         def to_db(value : {{target_type}}) : String
           to_db({{@type}}.new(value))
         end
