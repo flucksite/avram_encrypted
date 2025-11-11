@@ -115,8 +115,8 @@ class User < BaseModel
   struct SecretData
     include AvramEncrypted::Encryptable
 
-    getter : ip_address : String
-    getter : otp_secret : String
+    getter ip_address : String
+    getter otp_secret : String
 
     def initialize(@ip_address : String, @otp_secret : String)
     end
