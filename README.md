@@ -27,12 +27,17 @@ new saves use your current encryption key.
 1. Include the shard in your `shards.cr` file:
 
    ```crystal
+   # src/shards.cr
+
+   # ...
    require "avram_encrypted"
    ```
 
 2. Configure the keys:
 
    ```crystal
+   # config/avram_encrypted.cr
+
    AvramEncrypted.configure do |settings|
      settings.keys = {
        "v1" => "EnjmNNd/WgF9b9cm3ObR+9cYPHQ7G7lIiUL/pShKWP0=",
@@ -47,6 +52,8 @@ new saves use your current encryption key.
 3. Define the encrypted column:
 
    ```crystal
+   # src/models/user.cr
+
    class User < BaseModel
      table do
        column secret_value : AvramEncrypted::EncryptedString
