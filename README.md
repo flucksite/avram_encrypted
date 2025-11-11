@@ -41,6 +41,9 @@ new saves use your current encryption key.
    end
    ```
 
+   > [!TIP]
+   > Use the `lucky gen.secret_key` command to generate a new key.
+
 3. Define the encrypted column:
 
    ```crystal
@@ -59,14 +62,10 @@ new saves use your current encryption key.
    end
    ```
 
-> [!NOTE]
-> If you want to do batch key rotation, you'll also need to add an index to
-> the database column so that values encrypted with an older key can be looked
-> up efficiently:
->
-> ```crystal
-> add secret_value : String, index: true
-> ```
+   > [!NOTE]
+   > If you want to do batch key rotation, you'll also need to add an index to
+   > the database column so that values encrypted with an older key can be
+   > looked up efficiently: `add secret_value : String, index: true`.
 
 ### Encrypting built-in types
 
