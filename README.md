@@ -1,6 +1,7 @@
 # AvramEncrypted
 
-Encrypted columns for Avram supporting multiple types and automatic key rotation.
+Encrypted columns for [Avram](https://github.com/luckyframework/avram)
+supporting multiple types and automatic key rotation.
 
 Store sensitive data encrypted in your database leveraging Lucky's built-in
 `MessageEncryptor` (AES-256-CBC). Values are automatically encrypted before
@@ -49,6 +50,23 @@ new saves use your current encryption key.
      end
    end
    ```
+
+4. Add the database column:
+
+   ```crystal
+   alter table_for(User) do
+     add secret_value : String
+   end
+   ```
+
+> [!NOTE]
+> If you want to do batch key rotation, you'll also need to add an index to
+> the database column so that values encrypted with an older key can be looked
+> up efficiently:
+>
+> ```crystal
+> add secret_value : String, index: true
+> ```
 
 ## Configuration
 
