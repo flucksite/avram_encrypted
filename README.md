@@ -3,10 +3,8 @@
 Encrypted columns for [Avram](https://github.com/luckyframework/avram)
 supporting multiple types and automatic key rotation. Store sensitive data
 encrypted in your database leveraging Lucky's built-in `MessageEncryptor`
-(AES-256-CBC).
-
-Key rotation is supported out of the box, so old data remains readable while
-new saves use your current encryption key.
+(AES-256-CBC). Key rotation is supported out of the box, so old data remains
+readable while new saves use your current encryption key.
 
 ## Installation
 
@@ -20,7 +18,7 @@ new saves use your current encryption key.
 
 2. Run `shards install`
 
-## Usage
+## Configuration
 
 1. Include the shard in your `shards.cr` file:
 
@@ -60,7 +58,9 @@ new saves use your current encryption key.
    > the database column so that values encrypted with an older key can be
    > looked up efficiently: `add encrypted_secret_value : String, index: true`.
 
-4. Include the `AvramEncrypted::Model` mixin and define the encrypted column in
+## Usage
+
+1. Include the `AvramEncrypted::Model` mixin and define the encrypted column in
    your model:
 
    ```crystal
@@ -75,7 +75,7 @@ new saves use your current encryption key.
    end
    ```
 
-5. Include the `AvramEncrypted::Operation` mixin and define the encrypted
+2. Include the `AvramEncrypted::Operation` mixin and define the encrypted
    column in your operations where you want to update the encrypted column:
 
    ```crystal
