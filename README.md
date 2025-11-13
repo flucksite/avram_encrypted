@@ -1,11 +1,9 @@
 # AvramEncrypted
 
 Encrypted columns for [Avram](https://github.com/luckyframework/avram)
-supporting multiple types and automatic key rotation.
-
-Store sensitive data encrypted in your database leveraging Lucky's built-in
-`MessageEncryptor` (AES-256-CBC). Values are automatically encrypted before
-saving and decrypted when reading, so you can use them like regular columns.
+supporting multiple types and automatic key rotation. Store sensitive data
+encrypted in your database leveraging Lucky's built-in `MessageEncryptor`
+(AES-256-CBC).
 
 Key rotation is supported out of the box, so old data remains readable while
 new saves use your current encryption key.
@@ -49,71 +47,70 @@ new saves use your current encryption key.
    > [!TIP]
    > Use the `lucky gen.secret_key` command to generate a new key.
 
-3. Define the encrypted column:
-
-   ```crystal
-   # src/models/user.cr
-
-   class User < BaseModel
-     table do
-       column secret_value : AvramEncrypted::EncryptedString
-     end
-   end
-   ```
-
-4. Add the database column:
+3. Add the database column the `encrypted_` prefix:
 
    ```crystal
    alter table_for(User) do
-     add secret_value : String
+     add encrypted_secret_value : String
    end
    ```
 
    > [!NOTE]
    > If you want to do batch key rotation, you'll also need to add an index to
    > the database column so that values encrypted with an older key can be
-   > looked up efficiently: `add secret_value : String, index: true`.
+   > looked up efficiently: `add encrypted_secret_value : String, index: true`.
 
-### Encrypting built-in types
+4. Include the `AvramEncrypted::Model` mixin and define the encrypted column in
+   your model:
 
-By default, this shard comes with the following encrypted base types:
+   ```crystal
+   # src/models/user.cr
 
-- `AvramEncrypted::EncryptedString`
-- `AvramEncrypted::EncryptedInt32`
+   class User < BaseModel
+     include AvramEncrypted::Model
 
-Using the `AvramEncrypted::Types` annotation, you can register any other
-built-in type that responds to `#to_json` and `.from_json`:
+     table do
+       encrypted secret_value : String
+     end
+   end
+   ```
 
-```crystal
-# config/avram_encrypted.cr
+5. Include the `AvramEncrypted::Operation` mixin and define the encrypted
+   column in your operations where you want to update the encrypted column:
 
-@[AvramEncrypted::Types(String, Int32, Bool, UInt16)]
-module AvramEncrypted
-end
-```
+   ```crystal
+   # src/operations/save_user.cr
 
-Those additional encrypted types will then be available as:
+   class SaveUser < User::SaveOperation
+     include AvramEncrypted::Operation
 
-- `AvramEncrypted::EncryptedBool`
-- `AvramEncrypted::EncryptedUInt16`
+     encrypted secret_value : String
+   end
+   ```
 
-### Encrypting JSON objects
+### Supported types
+
+Every standard column type in Avram is supported out of the box, so you can
+encrypt whichever type you want, as long as it implements `#to_json` and
+`.from_json`.
 
 It's also possible to encrypt complete objects. Since the encrypted data can't
 be queried, it's actually a more efficient way to store encrypted data than
 creating individual columns.
 
-This works by creating a struct and including `AvramEncrypted::Encryptable`:
+This works by creating a struct and including `JSON::Serializable`:
 
 ```crystal
 class User < BaseModel
+  include AvramEncrypted::Model
+
   table do
     # ...
-    column secret_data : SecretData
+    encrypted secret_data : SecretData
   end
 
   struct SecretData
-    include AvramEncrypted::Encryptable
+    include JSON::Serializable
 
     getter ip_address : String
     getter otp_secret : String
@@ -135,9 +132,8 @@ user.secret_data.ip_address
 > [!NOTE]
 > This shard leverages Crystal's JSON pull-parser to stringify values before
 > encrypting them, and the other way around. That's why any class or struct
-> that implements to `#to_json` and `.from_json` will work. The
-> `AvramEncrypted::Encryptable` module takes care of this by including
-> `JSON::Serializable`.
+> that implements to `#to_json` and `.from_json` (through `JSON::Serializable`)
+> will work.
 
 ## Configuration
 
