@@ -75,15 +75,12 @@ readable while new saves use your current encryption key.
    end
    ```
 
-2. Include the `AvramEncrypted::Operation` mixin and define the encrypted
-   column in your operations where you want to update the encrypted column:
+2. Define the encrypted column in your operations where you want to update it:
 
    ```crystal
    # src/operations/save_user.cr
 
    class SaveUser < User::SaveOperation
-     include AvramEncrypted::Operation
-
      encrypted secret_value : String
    end
    ```
