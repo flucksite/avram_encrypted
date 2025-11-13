@@ -16,7 +16,7 @@ describe AvramEncrypted::Model do
     it "creates an encrypted column" do
       data = TestModel::SecretData.new(32)
       model = TestModel.new(name: "Nina", data: data)
-      model.encrypted_name.should be_nil
+      model.encrypted_name.should eq("")
     end
 
     it "decrypts the encrypted value" do
@@ -54,4 +54,8 @@ private struct TestModel
 
   encrypted name : String
   encrypted data : SecretData
+
+  class SaveOperation < Avram::SaveOperation(TestModel)
+    def attributes; end
+  end
 end

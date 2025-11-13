@@ -1,6 +1,13 @@
 require "json"
+require "avram"
 
 module AvramEncrypted::Model
+  macro included
+    class ::{{@type}}::SaveOperation < Avram::SaveOperation({{@type}})
+      include AvramEncrypted::Operation
+    end
+  end
+
   macro setup_encrypted_getter(type_declaration)
     {%
       var = type_declaration.var
@@ -20,14 +27,14 @@ module AvramEncrypted::Model
     %}
 
     def {{type_declaration}}
-      return @{{var.id}} if encrypted_{{var.id}}.nil?
+      return @{{var.id}} if encrypted_{{var.id}}.blank?
 
       AvramEncrypted::Cipher.decrypt(encrypted_{{var.id}}.to_s{% if type.id != String.id %}, type: {{type}}{% end %})
     end
   end
 
   macro encrypted(type_declaration)
-    column encrypted_{{type_declaration.var}} : String? = nil
+    column encrypted_{{type_declaration.var}} : String = String.new
 
     {{@type}}.setup_encrypted_getter({{type_declaration}})
   end
