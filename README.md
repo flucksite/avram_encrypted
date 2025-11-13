@@ -129,8 +129,77 @@ user.secret_data.ip_address
 > [!NOTE]
 > This shard leverages Crystal's JSON pull-parser to stringify values before
 > encrypting them, and the other way around. That's why any class or struct
-> that implements to `#to_json` and `.from_json` (through `JSON::Serializable`)
+> that implements `#to_json` and `.from_json` (through `JSON::Serializable`)
 > will work.
+
+### Encrypting, decrypting, and "recrypting" manually
+
+The underlying methods to `encrypt`, `decrypt`, or `recrypt` are also directly
+accessible. These may come in handy if you need to build custom behaviour or
+rotate encryption keys.
+
+To encrypt a value:
+
+```crystal
+encrypted_string = AvramEncrypted::Cipher.encrypt("ssst!")
+# => "v1:X7yHkoP..."
+
+# or an integer
+encrypted_int = AvramEncrypted::Cipher.encrypt(123)
+
+# or a custom object
+struct SecretData
+  include JSON::Serializable
+
+  getter otp_secret : String
+
+  def initialize(@otp_secret)
+  end
+end
+
+encrypted_object = AvramEncrypted::Cipher.encrypt(SecretData.new("xxx"))
+```
+
+To decrypt a value:
+
+```crystal
+decrypted_string = AvramEncrypted::Cipher.decrypt(encrypted_string)
+# => "ssst!"
+
+decrypted_int = AvramEncrypted::Cipher.decrypt(encrypted_int, Int32)
+# => 123
+
+decrypted_object = AvramEncrypted::Cipher.decrypt(encrypted_object, SecretData)
+# => SecretData(...)
+```
+
+After adding a new encryption key, you'll need to re-encrypt all existing data.
+That's where the `recrypt` method comes in:
+
+```crystal
+user = UserQuery.find(1)
+user.encrypted_otp_secret
+# => "v1:X4yTkoR..."
+
+AvramEncrypted::Cipher.recrypt(user.encrypted_otp_secret)
+# => "v2:Y2yGkoY..."
+```
+
+> [!NOTE]
+> When re-encrypting, you never need to pass the type. This method will never
+> parse the value to the original value. It will just re-encrypt the value
+> directly.
+
+So a re-encryption operation may look like this:
+
+```crystal
+class RecryptUserOtpSecret < User::SaveOperation
+  before_save do
+    encrypted_otp_secret.value = AvramEncrypted::Cipher.recrypt(encrypted_otp_secret.value)
+  end
+end
+
+```
 
 ## Maintenance
 
@@ -165,7 +234,7 @@ end
 
 > [!NOTE]
 > A bulk key rotation mechanism is in the making. You'll be able to run
-> batched rotation jobs focussed on specific columns in the background.
+> batched rotation jobs focused on specific columns in the background.
 
 ## Contributing
 
