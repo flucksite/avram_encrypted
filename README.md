@@ -45,7 +45,7 @@ readable while new saves use your current encryption key.
    > [!TIP]
    > Use the `lucky gen.secret_key` command to generate a new key.
 
-3. Add the database column the `encrypted_` prefix:
+3. Add the database column with the `encrypted_` prefix:
 
    ```crystal
    alter table_for(User) do
@@ -135,7 +135,7 @@ user.secret_data.ip_address
 > that implements to `#to_json` and `.from_json` (through `JSON::Serializable`)
 > will work.
 
-## Configuration
+## Maintenance
 
 ### Key versioning
 
