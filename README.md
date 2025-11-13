@@ -187,7 +187,7 @@ AvramEncrypted::Cipher.recrypt(user.encrypted_otp_secret)
 
 > [!NOTE]
 > When re-encrypting, you never need to pass the type. This method will never
-> parse the value to the original value. It will just re-encrypt the value
+> parse the value to the original type. It will just re-encrypt the value
 > directly.
 
 So a re-encryption operation may look like this:
