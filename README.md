@@ -245,7 +245,7 @@ end
 We use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
 for our commit messages, so please adhere to that pattern.
 
-1. Fork it (<https://github.com/your-github-user/avram_encrypted/fork>)
+1. Fork it (<https://codeberg.org/fluck/avram_encrypted/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'feat: new feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
