@@ -1,10 +1,14 @@
 # AvramEncrypted
 
 Encrypted columns for [Avram](https://github.com/luckyframework/avram)
-supporting multiple types and automatic key rotation. Store sensitive data
+supporting multiple types and automatic key rotation. Stores sensitive data
 encrypted in your database leveraging Lucky's built-in `MessageEncryptor`
 (AES-256-CBC). Key rotation is supported out of the box, so old data remains
 readable while new saves use your current encryption key.
+
+> [!Note]
+> The original repository is hosted at
+> [https://codeberg.org/fluck/avram_encrypted](https://codeberg.org/fluck/avram_encrypted).
 
 ## Installation
 
