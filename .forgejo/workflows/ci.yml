@@ -1,0 +1,20 @@
+on: [push]
+
+jobs:
+  test:
+    runs-on: codeberg-small
+    strategy:
+      matrix:
+        crystal_version: ["latest"]
+    container:
+      image: crystallang/crystal:${{ matrix.crystal_version }}
+    steps:
+      - run: git clone --depth 1 --branch ${{ github.ref_name }} ${{ github.server_url }}/${{ github.repository }} .
+      - name: Install shards
+        run: shards install
+      - name: Run tests
+        run: crystal spec
+      - name: Check format
+        run: crystal tool format --check
+      - name: Lint
+        run: ./bin/ameba
