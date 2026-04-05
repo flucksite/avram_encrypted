@@ -52,5 +52,5 @@ private struct TestOperation
     end
   end
 
-  encrypted height : Float64
+  encrypted height : Float64 # ameba:disable Lint/UselessAssign
 end

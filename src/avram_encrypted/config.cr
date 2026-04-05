@@ -2,8 +2,8 @@ require "habitat"
 
 module AvramEncrypted
   Habitat.create do
-    setting keys : Hash(String, String), validation: :validate_at_least_one
-    setting key_version : String, validation: :validate_existence
+    setting keys : Hash(String, String), validation: :validate_at_least_one # ameba:disable Lint/UselessAssign
+    setting key_version : String, validation: :validate_existence           # ameba:disable Lint/UselessAssign
   end
 
   def self.validate_at_least_one(value : Hash(String, String))
