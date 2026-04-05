@@ -26,10 +26,12 @@ module AvramEncrypted::Model
       end
     %}
 
-    def {{type_declaration}}
-      return @{{var.id}} if encrypted_{{var.id}}.blank?
+    @_{{var.id}}_cache : {{type}}?
 
-      AvramEncrypted::Cipher.decrypt(encrypted_{{var.id}}.to_s{% if type.id != String.id %}, type: {{type}}{% end %})
+    def {{var.id}} : {{type}}?
+      return @_{{var.id}}_cache if !@_{{var.id}}_cache.nil? || encrypted_{{var.id}}.blank?
+
+      @_{{var.id}}_cache = AvramEncrypted::Cipher.decrypt(encrypted_{{var.id}}.to_s{% if type.id != String.id %}, type: {{type}}{% end %})
     end
   end
 
