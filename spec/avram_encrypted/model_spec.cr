@@ -7,10 +7,10 @@ describe AvramEncrypted::Model do
   end
 
   describe ".encrypted macro" do
-    it "creates a getter" do
+    it "creates a getter that returns nil when encrypted column is blank" do
       data = TestModel::SecretData.new(32)
       model = TestModel.new(name: "Nina", data: data)
-      model.name.should eq("Nina")
+      model.name.should be_nil
     end
 
     it "creates an encrypted column" do
@@ -25,7 +25,15 @@ describe AvramEncrypted::Model do
       model.encrypted_name = AvramEncrypted::Cipher.encrypt("Dot")
       model.encrypted_data = AvramEncrypted::Cipher.encrypt(TestModel::SecretData.new(54))
       model.name.should eq("Dot")
-      model.data.age.should eq(54)
+      model.data.try(&.age).should eq(54)
+    end
+
+    it "caches decrypted values" do
+      data = TestModel::SecretData.new(32)
+      model = TestModel.new(name: "Nina", data: data)
+      model.encrypted_name = AvramEncrypted::Cipher.encrypt("Dot")
+      model.name.should eq("Dot")
+      model.name.should eq("Dot") # uses cache
     end
   end
 end
@@ -52,8 +60,8 @@ private struct TestModel
     end
   end
 
-  encrypted name : String
-  encrypted data : SecretData
+  encrypted name : String     # ameba:disable Lint/UselessAssign
+  encrypted data : SecretData # ameba:disable Lint/UselessAssign
 
   class SaveOperation < Avram::SaveOperation(TestModel)
     def attributes; end

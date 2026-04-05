@@ -1,5 +1,6 @@
 require "spec"
 require "../src/avram_encrypted"
+require "./support/avram"
 
 def set_up_default_test_keys
   AvramEncrypted.configure do |settings|
