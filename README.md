@@ -1,5 +1,8 @@
 # AvramEncrypted
 
+[![CI](https://codeberg.org/fluck/avram_encrypted/actions/workflows/ci.yml/badge.svg)](https://codeberg.org/fluck/avram_encrypted/actions?workflow=ci.yml)
+[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcodeberg.org%2Fapi%2Fv1%2Frepos%2Ffluck%2Favram_encrypted%2Ftags&query=%24%5B0%5D.name&label=version)](https://codeberg.org/fluck/avram_encrypted/tags)
+
 Encrypted columns for [Avram](https://github.com/luckyframework/avram)
 supporting multiple types and automatic key rotation. Stores sensitive data
 encrypted in the database leveraging Lucky's built-in `MessageEncryptor`
@@ -88,6 +91,18 @@ readable while new saves use your current encryption key.
      encrypted secret_value : String
    end
    ```
+
+> [!WARNING]
+> Encrypted columns cannot be queried or filtered on. Since the encrypted value
+> is an opaque string, queries like the following will not work as expected:
+>
+> ```crystal
+> # This will NOT find the user by their secret value:
+> UserQuery.new.encrypted_secret_value("v2:...")
+> ```
+>
+> If you need to search or filter on a value, consider storing a separate
+> non-sensitive identifier or a hashed version of the value in a plain column.
 
 ### Supported types
 
@@ -205,6 +220,31 @@ end
 
 ```
 
+### Error handling
+
+Decryption can fail if the encrypted data is corrupted, tampered with, or if
+the encryption key is no longer available. The following exceptions may be
+raised:
+
+- `AvramEncrypted::InvalidEncryptedFormatError`: the stored value doesn't
+  match the expected `version:data` format.
+- `AvramEncrypted::InvalidKeyVersionError`: the key version in the encrypted
+  value doesn't match any configured key.
+- `OpenSSL::Error`: the data couldn't be verified or decrypted (e.g.
+  corruption or wrong key).
+
+You can handle these in your application:
+
+```crystal
+begin
+  user.secret_value
+rescue ex : AvramEncrypted::InvalidKeyVersionError
+  Log.error(exception: ex) { "Missing encryption key for user #{user.id}" }
+rescue ex : OpenSSL::Error
+  Log.error(exception: ex) { "Decryption failed for user #{user.id}" }
+end
+```
+
 ## Maintenance
 
 ### Key versioning
@@ -236,9 +276,18 @@ AvramEncrypted.configure do |settings|
 end
 ```
 
-> [!NOTE]
-> A bulk key rotation mechanism is in the making. You'll be able to run
-> batched rotation jobs focused on specific columns in the background.
+To re-encrypt all existing records in bulk, query for rows still using the old
+key version and update them:
+
+```crystal
+UserQuery.new.encrypted_otp_secret.like("v1:%").each do |user|
+  RecryptUserOtpSecret.update!(user)
+end
+```
+
+> [!TIP]
+> Add a database index on the encrypted column if you plan to do bulk
+> re-encryption, so the `LIKE` query can find old records efficiently.
 
 ## Contributing
 
